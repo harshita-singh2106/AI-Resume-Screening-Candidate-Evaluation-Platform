@@ -187,6 +187,7 @@ app.get("/top-candidates", async (req, res) => {
    UPDATE STATUS
 ========================= */
 
+// Status update
 app.put("/resumes/:id/status", async (req, res) => {
   try {
     const { status } = req.body;
@@ -198,8 +199,27 @@ app.put("/resumes/:id/status", async (req, res) => {
     );
 
     res.json(updated);
-  } catch {
+  } catch (err) {
     res.status(500).json({ message: "Status update failed" });
+  }
+});
+
+
+// 👇 YAHAN ADD KARO (Step-2)
+
+app.put("/resumes/:id/notes", async (req, res) => {
+  try {
+    const { notes } = req.body;
+
+    const updated = await Resume.findByIdAndUpdate(
+      req.params.id,
+      { notes },
+      { new: true }
+    );
+
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: "Notes update failed" });
   }
 });
 

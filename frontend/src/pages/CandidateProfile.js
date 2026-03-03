@@ -6,19 +6,37 @@ import {
   Typography,
   Chip,
   Stack,
-  Box
+  Box,
+  TextField,
+  Button
 } from "@mui/material";
 
 export default function CandidateProfile() {
 
   const { id } = useParams();
   const [candidate, setCandidate] = useState(null);
+  const [notes, setNotes] = useState("");
+
+  const saveNotes = async () => {
+  await fetch(`http://localhost:5000/resumes/${id}/notes`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ notes }),
+  });
+
+  alert("Notes saved successfully");
+};
 
   // Fetch Candidate
   useEffect(() => {
     fetch(`http://localhost:5000/resumes/${id}`)
       .then(res => res.json())
-      .then(data => setCandidate(data));
+      .then(data => {
+        setCandidate(data);
+        setNotes(data.notes || "");
+      });
   }, [id]);
 
   if (!candidate) {
@@ -69,6 +87,28 @@ export default function CandidateProfile() {
               <Chip key={i} label={skill} />
             ))}
           </Stack>
+
+          {/* Notes Section */}
+<Typography variant="h6" mt={3} mb={1}>
+  Recruiter Notes
+</Typography>
+
+<TextField
+  fullWidth
+  multiline
+  rows={4}
+  value={notes}
+  onChange={(e) => setNotes(e.target.value)}
+  placeholder="Write recruiter notes here..."
+/>
+
+<Button
+  variant="contained"
+  sx={{ mt: 2 }}
+  onClick={saveNotes}
+>
+  Save Notes
+</Button>
 
           {/* Resume Viewer */}
           <Typography variant="h6" mt={3}>
