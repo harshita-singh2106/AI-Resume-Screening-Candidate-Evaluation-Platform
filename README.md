@@ -1,52 +1,64 @@
 # 🤖 AI Resume Screening & Candidate Evaluation Platform
 
-An AI-powered platform that helps recruiters automatically analyze resumes and evaluate candidates based on skills, experience, and job requirements.
+A full-stack MERN application that helps recruiters automatically analyze resumes, extract candidate skills, evaluate profiles, and manage the hiring process through an intelligent recruiter dashboard.
 
-This system simplifies the hiring process by using intelligent resume analysis and candidate scoring.
+This platform simplifies recruitment by automating resume screening and ranking candidates based on detected skills.
 
 ---
 
-## ✨ Features
+## 🚀 Features
 
-- 📄 Upload resumes in PDF format
-- 🤖 AI-powered resume analysis
-- 🎯 Skill extraction from resumes
-- 📊 Candidate evaluation and scoring
-- 🔍 Smart filtering of candidates
-- ⚡ Faster and automated recruitment process
+- 📄 Upload resumes in **PDF format**
+- 🧠 Automatic **resume parsing and skill extraction**
+- 🎯 **AI-based resume scoring system**
+- 📊 Recruiter **dashboard for candidate evaluation**
+- 🔍 **Search candidates by skill**
+- 🏆 **Top candidate ranking system**
+- 📝 Recruiter **notes for candidate feedback**
+- ✅ **Shortlist / Reject candidate actions**
+- 📂 **View and download resume**
+- ⚡ Faster and smarter recruitment workflow
 
 ---
 
 ## 🖥️ Project Interface
 
-### 📊 Dashboard
-![Dashboard](screenshots/dashboard.png)
+### 📊 Recruiter Dashboard
+Displays uploaded resumes, candidate scores, filtering options, and recruiter actions.
 
 ### 📄 Resume Upload
-![Upload Resume](screenshots/upload_resume.png)
+Upload candidate resumes in PDF format for automatic analysis.
 
-### 🧠 Candidate Evaluation Result
-![Evaluation Result](screenshots/evaluation_result.png)
+### 👤 Candidate Profile
+Detailed candidate profile including:
+
+- Resume score
+- Extracted skills
+- Resume preview
+- Recruiter notes
+- Status (Pending / Shortlisted / Rejected)
 
 ---
 
 ## 🛠 Tech Stack
 
-Frontend  
-- HTML  
-- CSS  
-- JavaScript  
+### Frontend
+- React.js
+- Material UI
+- JavaScript
+- CSS
 
-Backend  
-- Python  
-- Flask  
+### Backend
+- Node.js
+- Express.js
 
-AI / NLP  
-- Resume parsing  
-- Skill extraction  
+### Database
+- MongoDB
+- Mongoose
 
-Database  
-- SQLite / MongoDB  
+### Other Tools
+- Multer (File Upload)
+- PDF-Parse (Resume Text Extraction)
 
 ---
 
