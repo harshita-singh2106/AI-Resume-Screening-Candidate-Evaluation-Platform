@@ -189,67 +189,45 @@ app.get("/top-candidates", async (req, res) => {
 });
 
 // JOB SKILL MATCHING API
-app.post("/match-skills", async (req, res) => {
-
+app.post("/match", async (req, res) => {
   try {
-
     const { skills } = req.body;
 
-    const jobSkills = skills
-      .toLowerCase()
-      .split(",")
-      .map(skill => skill.trim());
+    const inputSkills = skills.map(s => s.toLowerCase());
 
     const resumes = await Resume.find();
 
     const results = resumes.map(candidate => {
 
-      const matched = candidate.skills.filter(skill =>
-        jobSkills.includes(skill)
+      const candidateSkills = candidate.skills.map(s => s.toLowerCase());
+
+      const matched = candidateSkills.filter(skill =>
+        inputSkills.includes(skill)
       );
 
-      const missing = jobSkills.filter(skill =>
-        !candidate.skills.includes(skill)
+      const missing = inputSkills.filter(skill =>
+        !candidateSkills.includes(skill)
       );
 
       const matchScore = Math.round(
-        (matched.length / jobSkills.length) * 100
+        (matched.length / inputSkills.length) * 100
       );
 
       return {
-        candidateId: candidate._id,
+        ...candidate._doc,
+        matchScore,
         matchedSkills: matched,
         missingSkills: missing,
-        matchScore: matchScore
       };
-
     });
+
+    // sort best first
+    results.sort((a, b) => b.matchScore - a.matchScore);
 
     res.json(results);
 
-  } catch (error) {
-    res.status(500).json({ message: "Skill matching failed" });
-  }
-
-});
-
-/* =========================
-   UPDATE STATUS
-========================= */
-
-app.put("/resumes/:id/status", async (req, res) => {
-  try {
-    const { status } = req.body;
-
-    const updated = await Resume.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
-
-    res.json(updated);
-  } catch {
-    res.status(500).json({ message: "Status update failed" });
+  } catch (err) {
+    res.status(500).json({ message: "Matching failed" });
   }
 });
 

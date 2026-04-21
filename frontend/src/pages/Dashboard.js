@@ -61,12 +61,12 @@ export default function Dashboard() {
 
   const matchSkills = async () => {
 
-  const res = await fetch("http://localhost:5000/match-skills", {
+  const res = await fetch("http://localhost:5000/match", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ skills: jobSkills })
+    body: JSON.stringify({ skills: jobSkills.split(",").map(s => s.trim()) })
   });
 
   const data = await res.json();
@@ -270,23 +270,53 @@ export default function Dashboard() {
       Skill Match Results
     </Typography>
 
-    {matches.map((m, i) => (
-      <Card key={i} sx={{ p:2, mb:2 }}>
+{matches.map((m, index) => (
+  <Card
+    key={index}
+    sx={{
+      mb: 2,
+      borderRadius: 3,
+      boxShadow: 2,
+      borderLeft: "6px solid",
+      borderColor:
+        m.matchScore >= 80
+          ? "green"
+          : m.matchScore >= 50
+          ? "orange"
+          : "red",
+    }}
+  >
+    <CardContent>
 
-        <Typography>
-          Match Score: {m.matchScore}%
-        </Typography>
+      {/* Rank */}
+      <Typography variant="subtitle2" color="text.secondary">
+        Rank #{index + 1}
+      </Typography>
 
-        <Typography>
-          Matched Skills: {m.matchedSkills.join(", ")}
-        </Typography>
+      {/* Score */}
+      <Typography variant="h6" fontWeight="bold">
+        Match Score: {m.matchScore}%
+      </Typography>
 
-        <Typography>
-          Missing Skills: {m.missingSkills.join(", ")}
-        </Typography>
+      {/* Matched */}
+      <Typography mt={1}>
+        ✅ <b>Matched:</b>{" "}
+        {m.matchedSkills?.length > 0
+          ? m.matchedSkills.join(", ")
+          : "None"}
+      </Typography>
 
-      </Card>
-    ))}
+      {/* Missing */}
+      <Typography>
+        ❌ <b>Missing:</b>{" "}
+        {m.missingSkills?.length > 0
+          ? m.missingSkills.join(", ")
+          : "None"}
+      </Typography>
+
+    </CardContent>
+  </Card>
+))}
 
   </Box>
 )}
