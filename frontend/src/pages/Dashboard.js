@@ -9,7 +9,8 @@ import {
   TextField,
   Box,
   Stack,
-  Chip
+  Chip,
+  LinearProgress
 } from "@mui/material";
 
 export default function Dashboard() {
@@ -71,7 +72,7 @@ export default function Dashboard() {
 
   const data = await res.json();
 
-  setMatches(data);
+  setMatches(data.sort((a, b) => b.matchScore - a.matchScore));
 
 };
 
@@ -145,13 +146,17 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ padding:"25px", background:"#f4f6f8", minHeight:"100vh" }}>
+    <div style={{ 
+      padding:"30px", 
+      minHeight: "100vh", 
+      background:"linear-gradient(135deg, #eef2f3, #dfe9f3)" 
+    }}>
 
       {/* Analytics */}
       <Grid container spacing={3} mb={3}>
 
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx = {{ borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Typography variant="h6">Total Resumes</Typography>
               <Typography variant="h4">{analytics.total}</Typography>
@@ -160,7 +165,7 @@ export default function Dashboard() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx = {{ borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Typography variant="h6">Average Score</Typography>
               <Typography variant="h4">{analytics.average}%</Typography>
@@ -169,7 +174,7 @@ export default function Dashboard() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx = {{ borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Typography variant="h6">Best Candidate</Typography>
               <Typography variant="h4">{analytics.best}%</Typography>
@@ -228,11 +233,11 @@ export default function Dashboard() {
           fullWidth
         />
 
-        <Button variant="contained" onClick={handleSearch}>
+        <Button variant="contained" sx = {{borderRadius: "10px", textTransform: "none"}} onClick={handleSearch}>
           Search
         </Button>
 
-        <Button variant="outlined" onClick={handleReset}>
+        <Button variant="outlined" sx = {{borderRadius: "10px", textTransform: "none"}} onClick={handleReset}>
           Reset
         </Button>
       </Box>
@@ -274,45 +279,65 @@ export default function Dashboard() {
   <Card
     key={index}
     sx={{
+      p: 2,
       mb: 2,
       borderRadius: 3,
-      boxShadow: 2,
-      borderLeft: "6px solid",
-      borderColor:
-        m.matchScore >= 80
-          ? "green"
-          : m.matchScore >= 50
-          ? "orange"
-          : "red",
+      boxShadow:
+        index === 0
+          ? "0 8px 25px rgba(255,215,0,0.5)"
+          : index === 1
+          ? "0 8px 25px rgba(192,192,192,0.5)"
+          : index === 2
+          ? "0 8px 25px rgba(205,127,50,0.5)"
+          : "0 6px 15px rgba(0,0,0,0.08)",
+      border:
+        index === 0
+          ? "2px solid gold"
+          : index === 1
+          ? "2px solid silver"
+          : index === 2
+          ? "2px solid #cd7f32"
+          : "none"
     }}
   >
     <CardContent>
-
-      {/* Rank */}
-      <Typography variant="subtitle2" color="text.secondary">
-        Rank #{index + 1}
+      <Typography variant="h6" fontWeight="bold" mb={1}>
+        #{index + 1} Candidate
       </Typography>
 
-      {/* Score */}
+      <Typography fontSize = "20px">
+        {index === 0 && "🏆 Best Match"}
+        {index === 1 && "🥈 Second Best"}
+        {index === 2 && "🥉 Third Best"}
+      </Typography>
+
       <Typography variant="h6" fontWeight="bold">
         Match Score: {m.matchScore}%
       </Typography>
 
-      {/* Matched */}
-      <Typography mt={1}>
-        ✅ <b>Matched:</b>{" "}
-        {m.matchedSkills?.length > 0
-          ? m.matchedSkills.join(", ")
-          : "None"}
-      </Typography>
+      <LinearProgress
+        variant="determinate"
+        value={m.matchScore}
+        sx={{
+          height: 10,
+          borderRadius: 5,
+          my: 2
+        }}
+      />
 
-      {/* Missing */}
-      <Typography>
-        ❌ <b>Missing:</b>{" "}
-        {m.missingSkills?.length > 0
-          ? m.missingSkills.join(", ")
-          : "None"}
-      </Typography>
+      <Typography fontWeight="bold">Matched Skills:</Typography>
+      <Stack direction="row" spacing={1} flexWrap="wrap" mb={1}>
+        {m.matchedSkills.map((s, idx) => (
+          <Chip key={idx} label={s} color="success" />
+        ))}
+      </Stack>
+
+      <Typography fontWeight="bold">Missing Skills:</Typography>
+      <Stack direction="row" spacing={1} flexWrap="wrap">
+        {m.missingSkills.map((s, idx) => (
+          <Chip key={idx} label={s} color="error" />
+        ))}
+      </Stack>
 
     </CardContent>
   </Card>
@@ -335,7 +360,18 @@ export default function Dashboard() {
           )
           .map(resume => (
 
-            <Card key={resume._id} sx={{ mb:3, borderRadius:3 }}>
+            <Card
+              key={resume._id}
+              sx={{
+                mb: 3,
+                borderRadius: 4,
+                boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+                transition: "0.3s",
+                "&:hover": {
+                  transform: "scale(1.02)",
+                }
+              }}
+>
               <CardContent>
 
                 <Chip
@@ -368,9 +404,19 @@ export default function Dashboard() {
                     <Chip
                       key={index}
                       label={skill}
-                      color="primary"
-                      variant="outlined"
+                      sx={{
+                        background: "#e3f2fd",
+                        color: "#1976d2",
+                        fontWeight: 500,
+                        borderRadius: "8px",
+                        px: 1,
+                        "&:hover": {
+                          background: "#bbdefb",
+                          transform: "scale(1.05)",
+                        }
+                      }}
                     />
+
                   ))}
                 </Stack>
 

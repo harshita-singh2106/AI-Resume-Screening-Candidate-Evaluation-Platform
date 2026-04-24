@@ -16,6 +16,7 @@ export default function CandidateProfile() {
   const { id } = useParams();
   const [candidate, setCandidate] = useState(null);
   const [notes, setNotes] = useState("");
+  const [aiData, setAiData] = useState(null);
 
   /* =========================
      SAVE RECRUITER NOTES
@@ -32,6 +33,22 @@ export default function CandidateProfile() {
 
     alert("Notes saved successfully");
   };
+
+  const getAI = async () => {
+  const res = await fetch("http://localhost:5000/ai-feedback", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      skills: candidate.skills,
+      score: candidate.score,
+    }),
+  });
+
+  const data = await res.json();
+  setAiData(data);
+};
 
   /* =========================
      FETCH CANDIDATE DATA
@@ -129,6 +146,30 @@ export default function CandidateProfile() {
           >
             Save Notes
           </Button>
+
+          <Button
+            variant="contained"
+            sx={{ mt: 2, ml: 2 }}
+            onClick={getAI}
+          >
+            Get AI Feedback
+          </Button>
+
+{aiData && (
+  <Card sx={{ mt: 3, p: 2 }}>
+    <Typography variant="h6">AI Feedback</Typography>
+
+    <Typography>{aiData.feedback}</Typography>
+
+    <Typography mt={1}>
+      Strengths: {aiData.strengths.join(", ")}
+    </Typography>
+
+    <Typography>
+      Weakness: {aiData.weaknesses.join(", ")}
+    </Typography>
+  </Card>
+)}
 
           {/* Resume Section */}
           <Typography variant="h6" mt={4}>

@@ -19,7 +19,7 @@ app.use(express.json());
 /* Show PDF inside browser (not download) */
 app.use(
   "/uploads",
-  express.static(path.join(__dirname, "uploads"))
+  express.static(path.join("uploads"))
 );
 
 /* =========================
@@ -249,6 +249,26 @@ app.put("/resumes/:id/notes", async (req, res) => {
   } catch {
     res.status(500).json({ message: "Notes update failed" });
   }
+});
+
+app.post("/ai-feedback", (req, res) => {
+  const { skills, score } = req.body;
+
+  let feedback = "";
+
+  if (score > 80) {
+    feedback = "Strong candidate with relevant skills.";
+  } else if (score > 50) {
+    feedback = "Average candidate, can improve in some areas.";
+  } else {
+    feedback = "Weak profile, missing important skills.";
+  }
+
+  res.json({
+    feedback,
+    strengths: skills.slice(0, 3),
+    weaknesses: ["Add more projects", "Improve skill depth"]
+  });
 });
 
 /* =========================
