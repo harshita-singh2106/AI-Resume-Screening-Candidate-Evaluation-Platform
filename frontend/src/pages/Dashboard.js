@@ -13,11 +13,37 @@ import {
   LinearProgress
 } from "@mui/material";
 
+import{
+  PieChart, 
+  Pie, 
+  Cell, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  CartesianGrid
+} from "recharts";
+
 export default function Dashboard() {
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
   const [resumes, setResumes] = useState([]);
+
+
+  // 👇 YAHAN ADD KARO (STEP 3)
+  const statusData = [
+    { name: "Pending", value: resumes.filter(r => r.status === "pending").length },
+    { name: "Shortlisted", value: resumes.filter(r => r.status === "shortlisted").length },
+    { name: "Rejected", value: resumes.filter(r => r.status === "rejected").length },
+  ];
+
+  const scoreData = resumes.map((r, i) => ({
+    name: `C${i + 1}`,
+    score: r.score
+  }));
+
   const [loading, setLoading] = useState(true);
   const [topCandidates, setTopCandidates] = useState([]);
   const [jobSkills, setJobSkills] = useState(" ");
@@ -28,6 +54,8 @@ export default function Dashboard() {
     average: 0,
     best: 0,
   });
+
+
 
   // ✅ Fetch Resumes + Analytics
   const fetchResumes = () => {
@@ -189,6 +217,8 @@ export default function Dashboard() {
         ⭐ Top Candidates
       </Typography>
 
+      
+
       {topCandidates.map(candidate => (
         <Card key={candidate._id} sx={{ mb:2 }}>
           <CardContent>
@@ -199,6 +229,42 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       ))}
+
+      <Box mt={4}>
+  <Typography variant="h5" mb={2}>
+    Analytics
+  </Typography>
+
+  <Box display="flex" gap={5} flexWrap="wrap">
+
+    {/* Bar Chart */}
+    <BarChart width={400} height={300} data={scoreData}>
+      <XAxis dataKey="name" />
+      <YAxis />
+      <Tooltip />
+      <Bar dataKey="score" fill="#1976d2" />
+    </BarChart>
+
+    {/* Pie Chart */}
+    <PieChart width={400} height={300}>
+      <Pie
+        data={statusData}
+        dataKey="value"
+        nameKey="name"
+        outerRadius={100}
+      >
+        {statusData.map((entry, index) => (
+          <Cell
+            key={index}
+            fill={["#ff9800", "#4caf50", "#f44336"][index]}
+          />
+        ))}
+      </Pie>
+      <Tooltip />
+    </PieChart>
+
+  </Box>
+</Box>
 
       <Typography variant="h5" mt={4} mb={2}>
   Job Skill Matching
