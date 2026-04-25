@@ -6,6 +6,9 @@ const Resume = require("./models/Resume");
 const pdfParse = require("pdf-parse");
 const mongoose = require("mongoose");
 const fs = require("fs");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 
 const app = express();
 
@@ -15,6 +18,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+const users = [];
 
 /* Show PDF inside browser (not download) */
 app.use(
@@ -269,6 +273,32 @@ app.post("/ai-feedback", (req, res) => {
     strengths: skills.slice(0, 3),
     weaknesses: ["Add more projects", "Improve skill depth"]
   });
+});
+
+app.post("/register", async (req, res) => {
+  const { email, password } = req.body;
+
+  // password hash
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // user store
+  users.push({ email, password: hashedPassword });
+
+  res.json({ message: "User registered successfully" });
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = users.find(u => u.email === email);
+  if (!user) return res.status(400).json({ message: "User not found" });
+
+  const match = await require("bcryptjs").compare(password, user.password);
+  if (!match) return res.status(400).json({ message: "Wrong password" });
+
+  const token = jwt.sign({ email }, "secretkey");
+
+  res.json({ token });
 });
 
 /* =========================

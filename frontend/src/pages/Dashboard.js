@@ -22,10 +22,13 @@ import{
   XAxis, 
   YAxis, 
   Tooltip, 
-  CartesianGrid
+  CartesianGrid 
 } from "recharts";
 
 export default function Dashboard() {
+  if(!localStorage.getItem("token")){
+    window.location.href = "/login";
+  }
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");

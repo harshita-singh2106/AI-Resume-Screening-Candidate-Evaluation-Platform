@@ -4,13 +4,14 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import ResumeUpload from "./pages/ResumeUpload";
 import CandidateProfile from "./pages/CandidateProfile";
+import Login from "./pages/Login";
 
 function App() {
   return (
     <BrowserRouter>
       <nav>
-        <Link to="/">Home</Link> |{" "}
-        <Link to="/dashboard">Dashboard</Link> |{" "}
+        <Link to="/">Home</Link> |
+        <Link to="/dashboard">Dashboard</Link> |
         <Link to="/upload">Upload</Link>
       </nav>
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/upload" element={<ResumeUpload />} />
         <Route path="/candidate/:id" element={<CandidateProfile />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );
