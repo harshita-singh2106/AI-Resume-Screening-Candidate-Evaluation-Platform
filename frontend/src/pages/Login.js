@@ -1,51 +1,58 @@
 import { useState } from "react";
-import { TextField, Button, Box, Typography } from "@mui/material";
 
-export default function Login() {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
-    const res = await fetch("http://localhost:5000/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password })
-    });
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-    const data = await res.json();
+    try {
+      const res = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-      window.location.href = "/";
-    } else {
-      alert("Login failed");
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+        alert("Login successful");
+        window.location.href = "/dashboard";
+      } else {
+        alert(data.message);
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server");
     }
   };
 
   return (
-    <Box sx={{ p: 5 }}>
-      <Typography variant="h4">Login</Typography>
+    <form onSubmit={handleLogin}>
+      <h2>Login</h2>
 
-      <TextField
-        label="Email"
-        fullWidth
-        sx={{ mt: 2 }}
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <TextField
-        label="Password"
+      <input
         type="password"
-        fullWidth
-        sx={{ mt: 2 }}
+        placeholder="Password"
+        value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      <Button variant="contained" sx={{ mt: 3 }} onClick={handleLogin}>
-        Login
-      </Button>
-    </Box>
+      <button type="submit">Login</button>
+    </form>
   );
 }
+
+export default Login;

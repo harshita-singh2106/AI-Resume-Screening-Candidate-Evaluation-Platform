@@ -18,7 +18,14 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-const users = [];
+// const bcrypt = require("bcryptjs");
+
+const users = [
+  {
+    email: "test@gmail.com",
+    password: bcrypt.hashSync("1234", 10)
+  }
+];
 
 /* Show PDF inside browser (not download) */
 app.use(
