@@ -9,11 +9,6 @@ import Login from "./pages/Login";
 function App() {
   return (
     <BrowserRouter>
-      <nav>
-        <Link to="/">Home</Link> |
-        <Link to="/dashboard">Dashboard</Link> |
-        <Link to="/upload">Upload</Link>
-      </nav>
 
       <Routes>
         <Route path="/" element={<Home />} />
