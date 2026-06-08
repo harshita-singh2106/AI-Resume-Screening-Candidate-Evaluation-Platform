@@ -11,8 +11,7 @@ import {
 } from "@mui/material";
 
 export default function Dashboard() {
-
-  // 🔐 Protect route
+  // 🔐 Protect Route
   if (!localStorage.getItem("token")) {
     window.location.href = "/login";
   }
@@ -21,154 +20,246 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetch("http://localhost:5000/top-candidates")
-      .then(res => res.json())
-      .then(data => setTopCandidates(data));
+      .then((res) => res.json())
+      .then((data) => setTopCandidates(data))
+      .catch((err) => console.log(err));
   }, []);
 
   return (
-    <Box sx={{ background: "#0f172a", minHeight: "100vh", color: "white" }}>
-
-      {/* 🔷 NAVBAR */}
-      <Box sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "15px 25px",
-        background: "#1e293b"
-      }}>
-
-        <Typography fontWeight="bold">AI RECRUIT HUB</Typography>
+    <Box
+      sx={{
+        background: "#0f172a",
+        minHeight: "100vh",
+        color: "white"
+      }}
+    >
+      {/* 🔷 TOP NAVBAR */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          px: 3,
+          py: 2,
+          background: "#1e293b",
+          borderBottom: "1px solid rgba(255,255,255,0.1)"
+        }}
+      >
+        <Typography fontWeight="bold" fontSize="22px">
+          AI RECRUIT HUB
+        </Typography>
 
         <TextField
           placeholder="Search candidates..."
           size="small"
           sx={{
+            width: "350px",
             background: "white",
-            borderRadius: "8px",
-            width: "300px"
+            borderRadius: "10px"
           }}
         />
 
-        <Box sx={{ display: "flex", gap: 3 }}>
-          <Link to="/" style={{ color: "white", textDecoration: "none" }}>Home</Link>
-          <Link to="/dashboard" style={{ color: "white", textDecoration: "none" }}>Dashboard</Link>
-          <Link to="/upload" style={{ color: "white", textDecoration: "none" }}>Upload</Link>
-        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Typography fontSize="22px">🔔</Typography>
 
+          <Avatar
+            sx={{
+              bgcolor: "#22c55e",
+              fontWeight: "bold"
+            }}
+          >
+            H
+          </Avatar>
+        </Box>
       </Box>
 
-      {/* 🔷 MAIN */}
+      {/* 🔷 MAIN LAYOUT */}
       <Box sx={{ display: "flex" }}>
-
         {/* 🔹 SIDEBAR */}
-        <Box sx={{
-          width: "200px",
-          background: "#1e293b",
-          height: "calc(100vh - 60px)",
-          padding: "20px"
-        }}>
-          <Typography mb={2}>🏠 Dashboard</Typography>
-          <Typography mb={2}>💼 Jobs</Typography>
-          <Typography mb={2}>👥 Candidates</Typography>
-          <Typography mb={2}>📊 Analytics</Typography>
+        <Box
+          sx={{
+            width: "220px",
+            background: "#1e293b",
+            minHeight: "calc(100vh - 70px)",
+            p: 3,
+            borderRight: "1px solid rgba(255,255,255,0.08)"
+          }}
+        >
+          <Typography
+            mb={3}
+            fontWeight="bold"
+            sx={{ cursor: "pointer" }}
+          >
+            🏠 Dashboard
+          </Typography>
+
+          <Link
+            to="/upload"
+            style={{
+              textDecoration: "none",
+              color: "white"
+            }}
+          >
+            <Typography mb={3}>
+              📄 Upload Resume
+            </Typography>
+          </Link>
+
+          <Typography mb={3}>
+            👥 Candidates
+          </Typography>
+
+          <Typography mb={3}>
+            📊 Analytics
+          </Typography>
+
+          <Typography
+            mt={6}
+            sx={{
+              cursor: "pointer",
+              color: "#ef4444",
+              fontWeight: "bold"
+            }}
+            onClick={() => {
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }}
+          >
+            🚪 Logout
+          </Typography>
         </Box>
 
-        {/* 🔹 CONTENT GRID */}
-        <Box sx={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 3,
-          padding: 3,
-          flex: 1
-        }}>
-
-          {/* 🔸 COLUMN 1 */}
-          <Card sx={{ background: "#1e293b", color: "white", borderRadius: 3 }}>
+        {/* 🔹 CONTENT */}
+        <Box
+          sx={{
+            flex: 1,
+            p: 3,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 3
+          }}
+        >
+          {/* JOB FEED */}
+          <Card
+            sx={{
+              background: "#1e293b",
+              color: "white",
+              borderRadius: 4
+            }}
+          >
             <CardContent>
-              <Typography variant="h6">Job Feed</Typography>
-              <Typography mt={2} color="gray">Coming soon...</Typography>
+              <Typography variant="h5" fontWeight="bold">
+                Job Feed
+              </Typography>
+
+              <Typography mt={3} color="#94a3b8">
+                Coming soon...
+              </Typography>
             </CardContent>
           </Card>
 
-          {/* 🔸 COLUMN 2 (MAIN PART) */}
-          <Card sx={{ background: "#1e293b", color: "white", borderRadius: 3 }}>
+          {/* CANDIDATES */}
+          <Card
+            sx={{
+              background: "#1e293b",
+              color: "white",
+              borderRadius: 4
+            }}
+          >
             <CardContent>
-              <Typography variant="h6">⭐ Candidate List</Typography>
+              <Typography variant="h5" fontWeight="bold">
+                ⭐ Candidate List
+              </Typography>
 
-              {topCandidates.map((c, i) => (
-                <Box key={i}
+              {topCandidates.map((candidate, index) => (
+                <Box
+                  key={index}
                   sx={{
                     mt: 2,
                     p: 2,
                     background: "#0f172a",
-                    borderRadius: "12px",
+                    borderRadius: "15px",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center"
                   }}
                 >
-
-                  {/* LEFT */}
                   <Box>
                     <Typography fontWeight="bold">
-                      Candidate {i + 1}
+                      Candidate {index + 1}
                     </Typography>
 
                     <Box mt={1}>
-                      {c.skills.slice(0, 3).map((s, i) => (
-                        <Chip
-                          key={i}
-                          label={s}
-                          sx={{
-                            mr: 1,
-                            mt: 1,
-                            background: "#1e293b",
-                            color: "white"
-                          }}
-                        />
-                      ))}
+                      {candidate.skills
+                        ?.slice(0, 3)
+                        .map((skill, i) => (
+                          <Chip
+                            key={i}
+                            label={skill}
+                            sx={{
+                              mr: 1,
+                              mt: 1,
+                              background: "#334155",
+                              color: "white"
+                            }}
+                          />
+                        ))}
                     </Box>
                   </Box>
 
-                  {/* RIGHT (SCORE CIRCLE STYLE) */}
-                  <Box sx={{
-                    width: "60px",
-                    height: "60px",
-                    borderRadius: "50%",
-                    border: "5px solid #22c55e",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold"
-                  }}>
-                    {c.score}%
+                  <Box
+                    sx={{
+                      width: "65px",
+                      height: "65px",
+                      borderRadius: "50%",
+                      border: "4px solid #22c55e",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {candidate.score}%
                   </Box>
-
                 </Box>
               ))}
-
             </CardContent>
           </Card>
 
-          {/* 🔸 COLUMN 3 */}
-          <Card sx={{ background: "#1e293b", color: "white", borderRadius: 3 }}>
+          {/* ANALYSIS */}
+          <Card
+            sx={{
+              background: "#1e293b",
+              color: "white",
+              borderRadius: 4
+            }}
+          >
             <CardContent>
-              <Typography variant="h6">Deep Analysis</Typography>
+              <Typography variant="h5" fontWeight="bold">
+                Deep Analysis
+              </Typography>
 
-              <Box mt={2} sx={{
-                background: "#0f172a",
-                p: 2,
-                borderRadius: "10px"
-              }}>
-                <Typography fontWeight="bold">AI Summary</Typography>
-                <Typography color="gray" mt={1}>
+              <Box
+                sx={{
+                  mt: 3,
+                  p: 2,
+                  background: "#0f172a",
+                  borderRadius: "12px"
+                }}
+              >
+                <Typography fontWeight="bold">
+                  AI Summary
+                </Typography>
+
+                <Typography
+                  mt={1}
+                  color="#94a3b8"
+                >
                   Candidate analysis will appear here...
                 </Typography>
               </Box>
-
             </CardContent>
           </Card>
-
         </Box>
       </Box>
     </Box>
