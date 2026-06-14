@@ -7,11 +7,11 @@ import {
   CardContent,
   Chip,
   TextField,
-  Avatar
+  Avatar,
+  Button
 } from "@mui/material";
 
 export default function Dashboard() {
-  // 🔐 Protect Route
   if (!localStorage.getItem("token")) {
     window.location.href = "/login";
   }
@@ -33,7 +33,7 @@ export default function Dashboard() {
         color: "white"
       }}
     >
-      {/* 🔷 TOP NAVBAR */}
+      {/* TOP NAVBAR */}
       <Box
         sx={{
           display: "flex",
@@ -73,9 +73,10 @@ export default function Dashboard() {
         </Box>
       </Box>
 
-      {/* 🔷 MAIN LAYOUT */}
+      {/* MAIN LAYOUT */}
       <Box sx={{ display: "flex" }}>
-        {/* 🔹 SIDEBAR */}
+
+        {/* SIDEBAR */}
         <Box
           sx={{
             width: "220px",
@@ -85,13 +86,17 @@ export default function Dashboard() {
             borderRight: "1px solid rgba(255,255,255,0.08)"
           }}
         >
-          <Typography
-            mb={3}
-            fontWeight="bold"
-            sx={{ cursor: "pointer" }}
+          <Link
+            to="/dashboard"
+            style={{
+              textDecoration: "none",
+              color: "white"
+            }}
           >
-            🏠 Dashboard
-          </Typography>
+            <Typography mb={3} fontWeight="bold">
+              🏠 Dashboard
+            </Typography>
+          </Link>
 
           <Link
             to="/upload"
@@ -122,14 +127,14 @@ export default function Dashboard() {
             }}
             onClick={() => {
               localStorage.removeItem("token");
-              window.location.href = "/login";
+              window.location.href = "/";
             }}
           >
             🚪 Logout
           </Typography>
         </Box>
 
-        {/* 🔹 CONTENT */}
+        {/* CONTENT */}
         <Box
           sx={{
             flex: 1,
@@ -152,13 +157,31 @@ export default function Dashboard() {
                 Job Feed
               </Typography>
 
-              <Typography mt={3} color="#94a3b8">
-                Coming soon...
-              </Typography>
+              <Box mt={3}>
+  <Typography fontWeight="bold" mb={2}>
+    Open Positions
+  </Typography>
+
+  <Typography color="#94a3b8" mb={1}>
+    • Frontend Developer
+  </Typography>
+
+  <Typography color="#94a3b8" mb={1}>
+    • Backend Developer
+  </Typography>
+
+  <Typography color="#94a3b8" mb={1}>
+    • Full Stack Developer
+  </Typography>
+
+  <Typography color="#94a3b8">
+    • Data Analyst
+  </Typography>
+</Box>
             </CardContent>
           </Card>
 
-          {/* CANDIDATES */}
+          {/* CANDIDATE LIST */}
           <Card
             sx={{
               background: "#1e293b",
@@ -173,7 +196,7 @@ export default function Dashboard() {
 
               {topCandidates.map((candidate, index) => (
                 <Box
-                  key={index}
+                  key={candidate._id || index}
                   sx={{
                     mt: 2,
                     p: 2,
@@ -181,7 +204,11 @@ export default function Dashboard() {
                     borderRadius: "15px",
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "center"
+                    alignItems: "center",
+                    transition: "0.3s",
+                    "&:hover": {
+                      transform: "translateY(-3px)"
+                    }
                   }}
                 >
                   <Box>
@@ -190,21 +217,30 @@ export default function Dashboard() {
                     </Typography>
 
                     <Box mt={1}>
-                      {candidate.skills
-                        ?.slice(0, 3)
-                        .map((skill, i) => (
-                          <Chip
-                            key={i}
-                            label={skill}
-                            sx={{
-                              mr: 1,
-                              mt: 1,
-                              background: "#334155",
-                              color: "white"
-                            }}
-                          />
-                        ))}
+                      {candidate.skills?.slice(0, 3).map((skill, i) => (
+                        <Chip
+                          key={i}
+                          label={skill}
+                          sx={{
+                            mr: 1,
+                            mt: 1,
+                            background: "#334155",
+                            color: "white"
+                          }}
+                        />
+                      ))}
                     </Box>
+
+                    <Button
+                      size="small"
+                      variant="contained"
+                      sx={{ mt: 2 }}
+                      onClick={() =>
+                        window.location.href = `/candidate/${candidate._id}`
+                      }
+                    >
+                      View Profile
+                    </Button>
                   </Box>
 
                   <Box
@@ -251,10 +287,7 @@ export default function Dashboard() {
                   AI Summary
                 </Typography>
 
-                <Typography
-                  mt={1}
-                  color="#94a3b8"
-                >
+                <Typography mt={1} color="#94a3b8">
                   Candidate analysis will appear here...
                 </Typography>
               </Box>
