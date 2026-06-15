@@ -110,9 +110,18 @@ export default function Dashboard() {
             </Typography>
           </Link>
 
-          <Typography mb={3}>
-            👥 Candidates
-          </Typography>
+          <Link
+            to="/candidates"
+            style={{
+              textDecoration: "none",
+              color: "white"
+            }}
+          >
+            <Typography mb={3}>
+              👥 Candidates
+            </Typography>
+          </Link>
+
 
           <Typography mb={3}>
             📊 Analytics
