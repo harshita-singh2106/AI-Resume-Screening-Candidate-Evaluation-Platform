@@ -6,6 +6,7 @@ import ResumeUpload from "./pages/ResumeUpload";
 import CandidateProfile from "./pages/CandidateProfile";
 import Login from "./pages/Login";
 import Candidates from "./pages/Candidates";
+import Analytics from "./pages/Analytics";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/candidate/:id" element={<CandidateProfile />} />
         <Route path="/login" element={<Login />} />
         <Route path="/candidates" element={<Candidates />} />
+        <Route path="/analytics" element={<Analytics />} />        
       </Routes>
     </BrowserRouter>
   );

@@ -123,9 +123,17 @@ export default function Dashboard() {
           </Link>
 
 
-          <Typography mb={3}>
-            📊 Analytics
-          </Typography>
+          <Link
+            to="/analytics"
+            style={{
+              textDecoration: "none",
+              color: "white"
+            }}
+          >
+            <Typography mb={3}>
+              📊 Analytics
+            </Typography>
+          </Link>
 
           <Typography
             mt={6}
