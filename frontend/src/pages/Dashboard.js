@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -8,15 +8,51 @@ import {
   Chip,
   TextField,
   Avatar,
-  Button
+  Button,
+  Menu,
+  MenuItem,
+  IconButton,
+  Badge,
+  Divider,
+  ListItemIcon
 } from "@mui/material";
 
 export default function Dashboard() {
-  if (!localStorage.getItem("token")) {
-    window.location.href = "/login";
-  }
-
   const [topCandidates, setTopCandidates] = useState([]);
+  const navigate = useNavigate();
+
+const [profileAnchor, setProfileAnchor] = useState(null);
+
+const openProfile = (event) => {
+  setProfileAnchor(event.currentTarget);
+};
+
+const closeProfile = () => {
+  setProfileAnchor(null);
+};
+  const [anchorEl, setAnchorEl] = useState(null);
+
+const notifications = [
+  "Resume uploaded successfully",
+  "AI evaluation completed",
+  "Candidate shortlisted",
+  "Recruiter notes updated"
+];
+
+const openNotification = (event) => {
+  setAnchorEl(event.currentTarget);
+};
+
+const closeNotification = () => {
+  setAnchorEl(null);
+};
+
+  // Auth check should be a side effect, not run directly during render
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      window.location.href = "/login";
+    }
+  }, []);
 
   useEffect(() => {
     fetch("http://localhost:5000/top-candidates")
@@ -60,22 +96,119 @@ export default function Dashboard() {
         />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Typography fontSize="22px">🔔</Typography>
+          <IconButton color="inherit" onClick={openNotification}>
+  <Badge badgeContent={notifications.length} color="error">
+    <Typography fontSize="22px">🔔</Typography>
+  </Badge>
+</IconButton>
 
           <Avatar
-            sx={{
-              bgcolor: "#22c55e",
-              fontWeight: "bold"
-            }}
-          >
-            H
-          </Avatar>
+  sx={{
+    bgcolor: "#22c55e",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "0.3s",
+    "&:hover": {
+      transform: "scale(1.08)",
+      boxShadow: "0 0 15px #22c55e"
+    }
+  }}
+  onClick={openProfile}
+>
+  H
+</Avatar>
+
+<Menu
+  anchorEl={profileAnchor}
+  open={Boolean(profileAnchor)}
+  onClose={closeProfile}
+  PaperProps={{
+    sx: {
+      width: 250,
+      borderRadius: 3,
+      mt: 1
+    }
+  }}
+>
+  <MenuItem disabled>
+    <Box>
+      <Typography fontWeight="bold">
+        Harshita Singh
+      </Typography>
+
+      <Typography
+        variant="body2"
+        color="text.secondary"
+      >
+        AI Recruiter
+      </Typography>
+    </Box>
+  </MenuItem>
+
+  <Divider />
+
+  <MenuItem
+  onClick={() => {
+    closeProfile();
+    navigate("/profile");
+  }}
+>
+  👤 View Profile
+</MenuItem>
+
+<MenuItem onClick={() => navigate("/edit-profile")}>
+  ✏️ Edit Profile
+</MenuItem>
+
+<MenuItem
+  onClick={() => alert("Settings Coming Soon 🚀")}
+>
+  ⚙️ Settings
+</MenuItem>
+
+  <Divider />
+
+  <MenuItem
+    onClick={() =>
+      alert("Settings Coming Soon 🚀")
+    }
+  >
+    ⚙ Settings
+  </MenuItem>
+
+  <Divider />
+
+  <MenuItem
+    onClick={() => {
+      localStorage.removeItem("token");
+      navigate("/");
+    }}
+    sx={{ color: "red" }}
+  >
+    🚪 Logout
+  </MenuItem>
+</Menu>
         </Box>
       </Box>
 
+      <Menu
+  anchorEl={anchorEl}
+  open={Boolean(anchorEl)}
+  onClose={closeNotification}
+>
+  <MenuItem disabled>
+    <b>Notifications</b>
+  </MenuItem>
+
+  <Divider />
+
+  {notifications.map((item, index) => (
+    <MenuItem key={index}>{item}</MenuItem>
+  ))}
+</Menu>
+
       {/* MAIN LAYOUT */}
       <Box sx={{ display: "flex" }}>
-
         {/* SIDEBAR */}
         <Box
           sx={{
@@ -105,9 +238,7 @@ export default function Dashboard() {
               color: "white"
             }}
           >
-            <Typography mb={3}>
-              📄 Upload Resume
-            </Typography>
+            <Typography mb={3}>📄 Upload Resume</Typography>
           </Link>
 
           <Link
@@ -117,11 +248,8 @@ export default function Dashboard() {
               color: "white"
             }}
           >
-            <Typography mb={3}>
-              👥 Candidates
-            </Typography>
+            <Typography mb={3}>👥 Candidates</Typography>
           </Link>
-
 
           <Link
             to="/analytics"
@@ -130,9 +258,7 @@ export default function Dashboard() {
               color: "white"
             }}
           >
-            <Typography mb={3}>
-              📊 Analytics
-            </Typography>
+            <Typography mb={3}>📊 Analytics</Typography>
           </Link>
 
           <Typography
@@ -175,26 +301,24 @@ export default function Dashboard() {
               </Typography>
 
               <Box mt={3}>
-  <Typography fontWeight="bold" mb={2}>
-    Open Positions
-  </Typography>
+                <Typography fontWeight="bold" mb={2}>
+                  Open Positions
+                </Typography>
 
-  <Typography color="#94a3b8" mb={1}>
-    • Frontend Developer
-  </Typography>
+                <Typography color="#94a3b8" mb={1}>
+                  • Frontend Developer
+                </Typography>
 
-  <Typography color="#94a3b8" mb={1}>
-    • Backend Developer
-  </Typography>
+                <Typography color="#94a3b8" mb={1}>
+                  • Backend Developer
+                </Typography>
 
-  <Typography color="#94a3b8" mb={1}>
-    • Full Stack Developer
-  </Typography>
+                <Typography color="#94a3b8" mb={1}>
+                  • Full Stack Developer
+                </Typography>
 
-  <Typography color="#94a3b8">
-    • Data Analyst
-  </Typography>
-</Box>
+                <Typography color="#94a3b8">• Data Analyst</Typography>
+              </Box>
             </CardContent>
           </Card>
 
@@ -253,7 +377,7 @@ export default function Dashboard() {
                       variant="contained"
                       sx={{ mt: 2 }}
                       onClick={() =>
-                        window.location.href = `/candidate/${candidate._id}`
+                        (window.location.href = `/candidate/${candidate._id}`)
                       }
                     >
                       View Profile
@@ -300,9 +424,7 @@ export default function Dashboard() {
                   borderRadius: "12px"
                 }}
               >
-                <Typography fontWeight="bold">
-                  AI Summary
-                </Typography>
+                <Typography fontWeight="bold">AI Summary</Typography>
 
                 <Typography mt={1} color="#94a3b8">
                   Candidate analysis will appear here...

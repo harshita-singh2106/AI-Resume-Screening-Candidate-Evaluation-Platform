@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   Card,
@@ -19,31 +19,41 @@ export default function CandidateProfile() {
   const [aiData, setAiData] = useState(null);
 
   const saveNotes = async () => {
-    await fetch(`http://localhost:5000/resumes/${id}/notes`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ notes }),
-    });
+    try {
+      await fetch(`http://localhost:5000/resumes/${id}/notes`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ notes }),
+      });
 
-    alert("Notes saved successfully");
+      alert("Notes saved successfully");
+    } catch (err) {
+      console.error("Failed to save notes:", err);
+      alert("Could not save notes. Please try again.");
+    }
   };
 
   const getAI = async () => {
-    const res = await fetch("http://localhost:5000/ai-feedback", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        skills: candidate.skills,
-        score: candidate.score,
-      }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/ai-feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          skills: candidate?.skills,
+          score: candidate?.score,
+        }),
+      });
 
-    const data = await res.json();
-    setAiData(data);
+      const data = await res.json();
+      setAiData(data);
+    } catch (err) {
+      console.error("Failed to get AI feedback:", err);
+      alert("Could not fetch AI feedback. Please try again.");
+    }
   };
 
   useEffect(() => {
@@ -52,7 +62,8 @@ export default function CandidateProfile() {
       .then((data) => {
         setCandidate(data);
         setNotes(data.notes || "");
-      });
+      })
+      .catch((err) => console.error("Failed to load candidate:", err));
   }, [id]);
 
   if (!candidate) {
@@ -107,17 +118,14 @@ export default function CandidateProfile() {
           <Typography color="#94a3b8" mt={1}>
             AI powered candidate evaluation report
           </Typography>
-          <Typography
-  variant="h5"
-  fontWeight="bold"
-  mt={3}
->
-  Harshita Singh
-</Typography>
 
-<Typography color="#94a3b8">
-  Full Stack Developer Candidate
-</Typography>
+          <Typography variant="h5" fontWeight="bold" mt={3}>
+            {candidate?.name || "Unnamed Candidate"}
+          </Typography>
+
+          <Typography color="#94a3b8">
+            {candidate?.role || "Role not specified"}
+          </Typography>
         </Box>
 
         <Link to="/dashboard" style={{ textDecoration: "none" }}>
@@ -170,7 +178,9 @@ export default function CandidateProfile() {
 
               <Typography color="#94a3b8" mt={1}>
                 Uploaded:{" "}
-                {new Date(candidate.createdAt).toLocaleString()}
+                {candidate.createdAt
+                  ? new Date(candidate.createdAt).toLocaleString()
+                  : "Unknown"}
               </Typography>
             </Box>
 
@@ -203,7 +213,7 @@ export default function CandidateProfile() {
           </Typography>
 
           <Stack direction="row" spacing={1} flexWrap="wrap">
-            {candidate.skills.map((skill, i) => (
+            {candidate?.skills?.map((skill, i) => (
               <Chip
                 key={i}
                 label={skill}
@@ -219,28 +229,28 @@ export default function CandidateProfile() {
           </Stack>
 
           <Box
-  sx={{
-    display: "flex",
-    gap: 2,
-    mt: 4,
-    flexWrap: "wrap"
-  }}
->
-  <Chip
-    label={`${candidate.skills.length} Skills Found`}
-    color="primary"
-  />
+            sx={{
+              display: "flex",
+              gap: 2,
+              mt: 4,
+              flexWrap: "wrap"
+            }}
+          >
+            <Chip
+              label={`${candidate?.skills?.length || 0} Skills Found`}
+              color="primary"
+            />
 
-  <Chip
-    label={candidate.status || "Pending"}
-    color="success"
-  />
+            <Chip
+              label={candidate?.status || "Pending"}
+              color="success"
+            />
 
-  <Chip
-    label="AI Evaluated"
-    color="secondary"
-  />
-</Box>
+            <Chip
+              label="AI Evaluated"
+              color="secondary"
+            />
+          </Box>
 
           {/* Notes */}
           <Typography
@@ -306,12 +316,12 @@ export default function CandidateProfile() {
 
                 <Typography mt={2}>
                   <b>Strengths:</b>{" "}
-                  {aiData.strengths.join(", ")}
+                  {aiData.strengths?.join(", ") || "None provided"}
                 </Typography>
 
                 <Typography mt={1}>
                   <b>Weaknesses:</b>{" "}
-                  {aiData.weaknesses.join(", ")}
+                  {aiData.weaknesses?.join(", ") || "None provided"}
                 </Typography>
               </CardContent>
             </Card>
@@ -357,7 +367,7 @@ export default function CandidateProfile() {
                   fontWeight="bold"
                   mt={1}
                 >
-                  {candidate?.file}
+                  {candidate?.file || "No file uploaded"}
                 </Typography>
               </Box>
 
@@ -369,6 +379,7 @@ export default function CandidateProfile() {
                   href={`http://localhost:5000/uploads/${candidate?.file}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  disabled={!candidate?.file}
                 >
                   Open Resume
                 </Button>
@@ -377,6 +388,7 @@ export default function CandidateProfile() {
                   variant="contained"
                   color="success"
                   onClick={downloadResume}
+                  disabled={!candidate?.file}
                 >
                   Download
                 </Button>
@@ -412,23 +424,23 @@ export default function CandidateProfile() {
                 fontSize: "15px",
               }}
             >
-              {candidate?.text}
+              {candidate?.text || "No resume text available"}
             </Typography>
           </Box>
         </CardContent>
       </Card>
 
       <Box
-  sx={{
-    textAlign: "center",
-    mt: 5,
-    pb: 3,
-    color: "#94a3b8",
-    fontSize: "14px"
-  }}
->
-  Made with ❤️ by Harshita Singh
-</Box>
+        sx={{
+          textAlign: "center",
+          mt: 5,
+          pb: 3,
+          color: "#94a3b8",
+          fontSize: "14px"
+        }}
+      >
+        Made with ❤️ by Harshita Singh
+      </Box>
     </Box>
   );
 }

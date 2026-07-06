@@ -9,8 +9,15 @@ const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-
 const app = express();
+
+/* =========================
+   CONFIG
+========================= */
+
+// Never hardcode secrets in source. Use an env var with a fallback only for local dev.
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
+const UPLOAD_DIR = path.join(__dirname, "uploads");
 
 /* =========================
    MIDDLEWARE
@@ -18,7 +25,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-// const bcrypt = require("bcryptjs");
 
 const users = [
   {
@@ -28,10 +34,8 @@ const users = [
 ];
 
 /* Show PDF inside browser (not download) */
-app.use(
-  "/uploads",
-  express.static(path.join("uploads"))
-);
+// Use an absolute path so this works no matter what directory the process is started from
+app.use("/uploads", express.static(UPLOAD_DIR));
 
 /* =========================
    DATABASE CONNECTION
@@ -48,7 +52,7 @@ mongoose
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, UPLOAD_DIR);
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
@@ -57,7 +61,16 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+// Restrict uploads to PDFs only, since the rest of the pipeline assumes PDF content
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== "application/pdf") {
+      return cb(new Error("Only PDF files are allowed"));
+    }
+    cb(null, true);
+  },
+});
 
 /* =========================
    UPLOAD RESUME + AI ANALYSIS
@@ -146,6 +159,9 @@ app.get("/resumes", async (req, res) => {
 app.get("/resumes/:id", async (req, res) => {
   try {
     const resume = await Resume.findById(req.params.id);
+    if (!resume) {
+      return res.status(404).json({ message: "Candidate not found" });
+    }
     res.json(resume);
   } catch {
     res.status(500).json({ message: "Candidate fetch error" });
@@ -158,7 +174,10 @@ app.get("/resumes/:id", async (req, res) => {
 
 app.delete("/resumes/:id", async (req, res) => {
   try {
-    await Resume.findByIdAndDelete(req.params.id);
+    const deleted = await Resume.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Candidate not found" });
+    }
     res.json({ message: "Resume deleted successfully" });
   } catch {
     res.status(500).json({ message: "Error deleting resume" });
@@ -172,6 +191,10 @@ app.delete("/resumes/:id", async (req, res) => {
 app.get("/search", async (req, res) => {
   try {
     const skill = req.query.skill;
+
+    if (!skill) {
+      return res.status(400).json({ message: "skill query parameter is required" });
+    }
 
     const resumes = await Resume.find({
       skills: { $regex: skill, $options: "i" },
@@ -204,13 +227,17 @@ app.post("/match", async (req, res) => {
   try {
     const { skills } = req.body;
 
+    if (!Array.isArray(skills) || skills.length === 0) {
+      return res.status(400).json({ message: "skills array is required" });
+    }
+
     const inputSkills = skills.map(s => s.toLowerCase());
 
     const resumes = await Resume.find();
 
     const results = resumes.map(candidate => {
 
-      const candidateSkills = candidate.skills.map(s => s.toLowerCase());
+      const candidateSkills = (candidate.skills || []).map(s => s.toLowerCase());
 
       const matched = candidateSkills.filter(skill =>
         inputSkills.includes(skill)
@@ -238,6 +265,7 @@ app.post("/match", async (req, res) => {
     res.json(results);
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Matching failed" });
   }
 });
@@ -256,6 +284,10 @@ app.put("/resumes/:id/notes", async (req, res) => {
       { new: true }
     );
 
+    if (!updated) {
+      return res.status(404).json({ message: "Candidate not found" });
+    }
+
     res.json(updated);
   } catch {
     res.status(500).json({ message: "Notes update failed" });
@@ -265,11 +297,14 @@ app.put("/resumes/:id/notes", async (req, res) => {
 app.post("/ai-feedback", (req, res) => {
   const { skills, score } = req.body;
 
+  const safeSkills = Array.isArray(skills) ? skills : [];
+  const safeScore = typeof score === "number" ? score : 0;
+
   let feedback = "";
 
-  if (score > 80) {
+  if (safeScore > 80) {
     feedback = "Strong candidate with relevant skills.";
-  } else if (score > 50) {
+  } else if (safeScore > 50) {
     feedback = "Average candidate, can improve in some areas.";
   } else {
     feedback = "Weak profile, missing important skills.";
@@ -277,35 +312,55 @@ app.post("/ai-feedback", (req, res) => {
 
   res.json({
     feedback,
-    strengths: skills.slice(0, 3),
+    strengths: safeSkills.slice(0, 3),
     weaknesses: ["Add more projects", "Improve skill depth"]
   });
 });
 
 app.post("/register", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  // password hash
-  const hashedPassword = await bcrypt.hash(password, 10);
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
 
-  // user store
-  users.push({ email, password: hashedPassword });
+    const existing = users.find(u => u.email === email);
+    if (existing) {
+      return res.status(409).json({ message: "User already exists" });
+    }
 
-  res.json({ message: "User registered successfully" });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    users.push({ email, password: hashedPassword });
+
+    res.json({ message: "User registered successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Registration failed" });
+  }
 });
 
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = users.find(u => u.email === email);
-  if (!user) return res.status(400).json({ message: "User not found" });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
 
-  const match = await require("bcryptjs").compare(password, user.password);
-  if (!match) return res.status(400).json({ message: "Wrong password" });
+    const user = users.find(u => u.email === email);
+    if (!user) return res.status(400).json({ message: "User not found" });
 
-  const token = jwt.sign({ email }, "secretkey");
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ message: "Wrong password" });
 
-  res.json({ token });
+    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "7d" });
+
+    res.json({ token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Login failed" });
+  }
 });
 
 /* =========================
