@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -7,6 +7,7 @@ import {
   CardContent,
   Chip,
   TextField,
+  InputAdornment,
   Avatar,
   Button,
   Menu,
@@ -14,38 +15,45 @@ import {
   IconButton,
   Badge,
   Divider,
-  ListItemIcon
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 
 export default function Dashboard() {
   const [topCandidates, setTopCandidates] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-const [profileAnchor, setProfileAnchor] = useState(null);
+  const [profileAnchor, setProfileAnchor] = useState(null);
+  const openProfile = (event) => setProfileAnchor(event.currentTarget);
+  const closeProfile = () => setProfileAnchor(null);
 
-const openProfile = (event) => {
-  setProfileAnchor(event.currentTarget);
-};
-
-const closeProfile = () => {
-  setProfileAnchor(null);
-};
   const [anchorEl, setAnchorEl] = useState(null);
+  const openNotification = (event) => setAnchorEl(event.currentTarget);
+  const closeNotification = () => setAnchorEl(null);
 
-const notifications = [
-  "Resume uploaded successfully",
-  "AI evaluation completed",
-  "Candidate shortlisted",
-  "Recruiter notes updated"
-];
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const requestLogout = () => {
+    // Close whichever menu triggered this before showing the dialog
+    closeProfile();
+    setLogoutDialogOpen(true);
+  };
+  const cancelLogout = () => setLogoutDialogOpen(false);
+  const confirmLogout = () => {
+    localStorage.removeItem("token");
+    setLogoutDialogOpen(false);
+    navigate("/");
+  };
 
-const openNotification = (event) => {
-  setAnchorEl(event.currentTarget);
-};
-
-const closeNotification = () => {
-  setAnchorEl(null);
-};
+  const notifications = [
+    "Resume uploaded successfully",
+    "AI evaluation completed",
+    "Candidate shortlisted",
+    "Recruiter notes updated"
+  ];
 
   // Auth check should be a side effect, not run directly during render
   useEffect(() => {
@@ -61,6 +69,18 @@ const closeNotification = () => {
       .catch((err) => console.log(err));
   }, []);
 
+  const filteredCandidates = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return topCandidates;
+    return topCandidates.filter((candidate) => {
+      const skillMatch = candidate.skills?.some((skill) =>
+        skill.toLowerCase().includes(term)
+      );
+      const nameMatch = candidate.name?.toLowerCase().includes(term);
+      return skillMatch || nameMatch;
+    });
+  }, [topCandidates, searchTerm]);
+
   return (
     <Box
       sx={{
@@ -73,8 +93,10 @@ const closeNotification = () => {
       <Box
         sx={{
           display: "flex",
+          flexWrap: "wrap",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 2,
           px: 3,
           py: 2,
           background: "#1e293b",
@@ -86,192 +108,184 @@ const closeNotification = () => {
         </Typography>
 
         <TextField
-          placeholder="Search candidates..."
+          placeholder="Search candidates by name or skill..."
           size="small"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Typography fontSize="16px">🔍</Typography>
+              </InputAdornment>
+            )
+          }}
           sx={{
-            width: "350px",
+            width: { xs: "100%", sm: "300px", md: "350px" },
             background: "white",
-            borderRadius: "10px"
+            borderRadius: "10px",
+            "& fieldset": { border: "none" }
           }}
         />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <IconButton color="inherit" onClick={openNotification}>
-  <Badge badgeContent={notifications.length} color="error">
-    <Typography fontSize="22px">🔔</Typography>
-  </Badge>
-</IconButton>
+            <Badge badgeContent={notifications.length} color="error">
+              <Typography fontSize="22px">🔔</Typography>
+            </Badge>
+          </IconButton>
 
           <Avatar
-  sx={{
-    bgcolor: "#22c55e",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "0.3s",
-    "&:hover": {
-      transform: "scale(1.08)",
-      boxShadow: "0 0 15px #22c55e"
-    }
-  }}
-  onClick={openProfile}
->
-  H
-</Avatar>
+            sx={{
+              bgcolor: "#22c55e",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "0.3s",
+              "&:hover": {
+                transform: "scale(1.08)",
+                boxShadow: "0 0 15px #22c55e"
+              }
+            }}
+            onClick={openProfile}
+          >
+            H
+          </Avatar>
 
-<Menu
-  anchorEl={profileAnchor}
-  open={Boolean(profileAnchor)}
-  onClose={closeProfile}
-  PaperProps={{
-    sx: {
-      width: 250,
-      borderRadius: 3,
-      mt: 1
-    }
-  }}
->
-  <MenuItem disabled>
-    <Box>
-      <Typography fontWeight="bold">
-        Harshita Singh
-      </Typography>
+          <Menu
+            anchorEl={profileAnchor}
+            open={Boolean(profileAnchor)}
+            onClose={closeProfile}
+            PaperProps={{
+              sx: {
+                width: 250,
+                borderRadius: 3,
+                mt: 1
+              }
+            }}
+          >
+            <MenuItem disabled>
+              <Box>
+                <Typography fontWeight="bold">Harshita Singh</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  AI Recruiter
+                </Typography>
+              </Box>
+            </MenuItem>
 
-      <Typography
-        variant="body2"
-        color="text.secondary"
-      >
-        AI Recruiter
-      </Typography>
-    </Box>
-  </MenuItem>
+            <Divider />
 
-  <Divider />
+            <MenuItem
+              onClick={() => {
+                closeProfile();
+                navigate("/profile");
+              }}
+            >
+              👤 View Profile
+            </MenuItem>
 
-  <MenuItem
-  onClick={() => {
-    closeProfile();
-    navigate("/profile");
-  }}
->
-  👤 View Profile
-</MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeProfile();
+                navigate("/profile");
+              }}
+            >
+              ✏️ Edit Profile
+            </MenuItem>
 
-<MenuItem onClick={() => navigate("/edit-profile")}>
-  ✏️ Edit Profile
-</MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeProfile();
+                alert("Settings Coming Soon 🚀");
+              }}
+            >
+              ⚙️ Settings
+            </MenuItem>
 
-<MenuItem
-  onClick={() => alert("Settings Coming Soon 🚀")}
->
-  ⚙️ Settings
-</MenuItem>
+            <Divider />
 
-  <Divider />
-
-  <MenuItem
-    onClick={() =>
-      alert("Settings Coming Soon 🚀")
-    }
-  >
-    ⚙ Settings
-  </MenuItem>
-
-  <Divider />
-
-  <MenuItem
-    onClick={() => {
-      localStorage.removeItem("token");
-      navigate("/");
-    }}
-    sx={{ color: "red" }}
-  >
-    🚪 Logout
-  </MenuItem>
-</Menu>
+            <MenuItem onClick={requestLogout} sx={{ color: "red" }}>
+              🚪 Logout
+            </MenuItem>
+          </Menu>
         </Box>
       </Box>
 
-      <Menu
-  anchorEl={anchorEl}
-  open={Boolean(anchorEl)}
-  onClose={closeNotification}
->
-  <MenuItem disabled>
-    <b>Notifications</b>
-  </MenuItem>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeNotification}>
+        <MenuItem disabled>
+          <b>Notifications</b>
+        </MenuItem>
 
-  <Divider />
+        <Divider />
 
-  {notifications.map((item, index) => (
-    <MenuItem key={index}>{item}</MenuItem>
-  ))}
-</Menu>
+        {notifications.length === 0 ? (
+          <MenuItem disabled>You're all caught up</MenuItem>
+        ) : (
+          notifications.map((item, index) => (
+            <MenuItem key={index} onClick={closeNotification}>
+              {item}
+            </MenuItem>
+          ))
+        )}
+      </Menu>
+
+      {/* LOGOUT CONFIRMATION DIALOG */}
+      <Dialog open={logoutDialogOpen} onClose={cancelLogout}>
+        <DialogTitle>Log out?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You'll need to sign in again to access your dashboard.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelLogout}>Cancel</Button>
+          <Button onClick={confirmLogout} color="error" variant="contained">
+            Log out
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* MAIN LAYOUT */}
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" } }}>
         {/* SIDEBAR */}
         <Box
           sx={{
-            width: "220px",
+            width: { xs: "100%", md: "220px" },
             background: "#1e293b",
-            minHeight: "calc(100vh - 70px)",
+            minHeight: { md: "calc(100vh - 70px)" },
             p: 3,
-            borderRight: "1px solid rgba(255,255,255,0.08)"
+            borderRight: { md: "1px solid rgba(255,255,255,0.08)" },
+            borderBottom: { xs: "1px solid rgba(255,255,255,0.08)", md: "none" },
+            display: "flex",
+            flexDirection: { xs: "row", md: "column" },
+            flexWrap: "wrap",
+            gap: { xs: 2, md: 0 }
           }}
         >
-          <Link
-            to="/dashboard"
-            style={{
-              textDecoration: "none",
-              color: "white"
-            }}
-          >
-            <Typography mb={3} fontWeight="bold">
+          <Link to="/dashboard" style={{ textDecoration: "none", color: "white" }}>
+            <Typography mb={{ xs: 0, md: 3 }} fontWeight="bold">
               🏠 Dashboard
             </Typography>
           </Link>
 
-          <Link
-            to="/upload"
-            style={{
-              textDecoration: "none",
-              color: "white"
-            }}
-          >
-            <Typography mb={3}>📄 Upload Resume</Typography>
+          <Link to="/upload" style={{ textDecoration: "none", color: "white" }}>
+            <Typography mb={{ xs: 0, md: 3 }}>📄 Upload Resume</Typography>
           </Link>
 
-          <Link
-            to="/candidates"
-            style={{
-              textDecoration: "none",
-              color: "white"
-            }}
-          >
-            <Typography mb={3}>👥 Candidates</Typography>
+          <Link to="/candidates" style={{ textDecoration: "none", color: "white" }}>
+            <Typography mb={{ xs: 0, md: 3 }}>👥 Candidates</Typography>
           </Link>
 
-          <Link
-            to="/analytics"
-            style={{
-              textDecoration: "none",
-              color: "white"
-            }}
-          >
-            <Typography mb={3}>📊 Analytics</Typography>
+          <Link to="/analytics" style={{ textDecoration: "none", color: "white" }}>
+            <Typography mb={{ xs: 0, md: 3 }}>📊 Analytics</Typography>
           </Link>
 
           <Typography
-            mt={6}
+            mt={{ xs: 0, md: 6 }}
             sx={{
               cursor: "pointer",
               color: "#ef4444",
               fontWeight: "bold"
             }}
-            onClick={() => {
-              localStorage.removeItem("token");
-              window.location.href = "/";
-            }}
+            onClick={requestLogout}
           >
             🚪 Logout
           </Typography>
@@ -283,7 +297,7 @@ const closeNotification = () => {
             flex: 1,
             p: 3,
             display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr", lg: "1fr 1fr 1fr" },
             gap: 3
           }}
         >
@@ -292,12 +306,13 @@ const closeNotification = () => {
             sx={{
               background: "#1e293b",
               color: "white",
-              borderRadius: 4
+              borderRadius: 4,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.25)"
             }}
           >
             <CardContent>
               <Typography variant="h5" fontWeight="bold">
-                Job Feed
+                💼 Job Feed
               </Typography>
 
               <Box mt={3}>
@@ -305,19 +320,13 @@ const closeNotification = () => {
                   Open Positions
                 </Typography>
 
-                <Typography color="#94a3b8" mb={1}>
-                  • Frontend Developer
-                </Typography>
-
-                <Typography color="#94a3b8" mb={1}>
-                  • Backend Developer
-                </Typography>
-
-                <Typography color="#94a3b8" mb={1}>
-                  • Full Stack Developer
-                </Typography>
-
-                <Typography color="#94a3b8">• Data Analyst</Typography>
+                {["Frontend Developer", "Backend Developer", "Full Stack Developer", "Data Analyst"].map(
+                  (role) => (
+                    <Typography key={role} color="#94a3b8" mb={1}>
+                      • {role}
+                    </Typography>
+                  )
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -327,7 +336,8 @@ const closeNotification = () => {
             sx={{
               background: "#1e293b",
               color: "white",
-              borderRadius: 4
+              borderRadius: 4,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.25)"
             }}
           >
             <CardContent>
@@ -335,71 +345,81 @@ const closeNotification = () => {
                 ⭐ Candidate List
               </Typography>
 
-              {topCandidates.map((candidate, index) => (
-                <Box
-                  key={candidate._id || index}
-                  sx={{
-                    mt: 2,
-                    p: 2,
-                    background: "#0f172a",
-                    borderRadius: "15px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    transition: "0.3s",
-                    "&:hover": {
-                      transform: "translateY(-3px)"
-                    }
-                  }}
-                >
-                  <Box>
-                    <Typography fontWeight="bold">
-                      Candidate {index + 1}
-                    </Typography>
-
-                    <Box mt={1}>
-                      {candidate.skills?.slice(0, 3).map((skill, i) => (
-                        <Chip
-                          key={i}
-                          label={skill}
-                          sx={{
-                            mr: 1,
-                            mt: 1,
-                            background: "#334155",
-                            color: "white"
-                          }}
-                        />
-                      ))}
-                    </Box>
-
-                    <Button
-                      size="small"
-                      variant="contained"
-                      sx={{ mt: 2 }}
-                      onClick={() =>
-                        (window.location.href = `/candidate/${candidate._id}`)
-                      }
-                    >
-                      View Profile
-                    </Button>
-                  </Box>
-
+              {filteredCandidates.length === 0 ? (
+                <Typography mt={3} color="#94a3b8">
+                  {searchTerm
+                    ? `No candidates match "${searchTerm}".`
+                    : "No candidates yet — upload a resume to get started."}
+                </Typography>
+              ) : (
+                filteredCandidates.map((candidate, index) => (
                   <Box
+                    key={candidate._id || index}
                     sx={{
-                      width: "65px",
-                      height: "65px",
-                      borderRadius: "50%",
-                      border: "4px solid #22c55e",
+                      mt: 2,
+                      p: 2,
+                      background: "#0f172a",
+                      borderRadius: "15px",
                       display: "flex",
+                      justifyContent: "space-between",
                       alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: "bold"
+                      gap: 2,
+                      flexWrap: "wrap",
+                      transition: "0.3s",
+                      "&:hover": {
+                        transform: "translateY(-3px)",
+                        boxShadow: "0 6px 18px rgba(34,197,94,0.15)"
+                      }
                     }}
                   >
-                    {candidate.score}%
+                    <Box>
+                      <Typography fontWeight="bold">
+                        {candidate.name || `Candidate ${index + 1}`}
+                      </Typography>
+
+                      <Box mt={1}>
+                        {candidate.skills?.slice(0, 3).map((skill, i) => (
+                          <Chip
+                            key={i}
+                            label={skill}
+                            sx={{
+                              mr: 1,
+                              mt: 1,
+                              background: "#334155",
+                              color: "white"
+                            }}
+                          />
+                        ))}
+                      </Box>
+
+                      <Button
+                        size="small"
+                        variant="contained"
+                        sx={{ mt: 2 }}
+                        onClick={() => navigate(`/candidate/${candidate._id}`)}
+                      >
+                        View Profile
+                      </Button>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        width: "65px",
+                        height: "65px",
+                        borderRadius: "50%",
+                        border: "4px solid #22c55e",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: "bold",
+                        flexShrink: 0
+                      }}
+                    >
+                      {candidate.score}%
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -408,12 +428,13 @@ const closeNotification = () => {
             sx={{
               background: "#1e293b",
               color: "white",
-              borderRadius: 4
+              borderRadius: 4,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.25)"
             }}
           >
             <CardContent>
               <Typography variant="h5" fontWeight="bold">
-                Deep Analysis
+                🧠 Deep Analysis
               </Typography>
 
               <Box
