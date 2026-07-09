@@ -447,9 +447,11 @@ export default function Dashboard() {
               >
                 <Typography fontWeight="bold">AI Summary</Typography>
 
-                <Typography mt={1} color="#94a3b8">
-                  Candidate analysis will appear here...
-                </Typography>
+                <Typography mt={1} color="#94a3b8" lineHeight={1.8}>
+                This module is under development and will provide AI-generated candidate insights,
+                hiring recommendations, skill-gap analysis, candidate ranking, and predictive hiring
+                analytics in future versions.
+              </Typography>
               </Box>
             </CardContent>
           </Card>
