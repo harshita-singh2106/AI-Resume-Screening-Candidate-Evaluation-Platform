@@ -1,70 +1,168 @@
-# 🤖 AI Resume Screening & Candidate Evaluation Platform
+# 🤖 AI Recruit Hub
 
-A full-stack MERN application that helps recruiters automatically analyze resumes, extract candidate skills, evaluate profiles, and manage the hiring process through an intelligent recruiter dashboard.
+### AI-Powered Resume Screening & Candidate Evaluation Platform
 
-This platform simplifies recruitment by automating resume screening and ranking candidates based on detected skills.
+AI Recruit Hub is a full-stack MERN application designed to simplify the recruitment process. It enables recruiters to upload resumes, automatically extract candidate skills, evaluate applicants using AI, manage candidate profiles, and monitor the hiring process through an interactive recruiter dashboard.
 
----
-
-## 🚀 Features
-
-- 📄 Upload resumes in **PDF format**
-- 🧠 Automatic **resume parsing and skill extraction**
-- 🎯 **AI-based resume scoring system**
-- 📊 Recruiter **dashboard for candidate evaluation**
-- 🔍 **Search candidates by skill**
-- 🏆 **Top candidate ranking system**
-- 📝 Recruiter **notes for candidate feedback**
-- ✅ **Shortlist / Reject candidate actions**
-- 📂 **View and download resume**
-- ⚡ Faster and smarter recruitment workflow
+The platform helps recruiters reduce manual screening effort and make faster, data-driven hiring decisions.
 
 ---
 
-## 🖥️ Project Interface
+# 🚀 Features
 
-### 📊 Recruiter Dashboard
-Displays uploaded resumes, candidate scores, filtering options, and recruiter actions.
-
-### 📄 Resume Upload
-Upload candidate resumes in PDF format for automatic analysis.
-
-### 👤 Candidate Profile
-Detailed candidate profile including:
-
-- Resume score
-- Extracted skills
-- Resume preview
-- Recruiter notes
-- Status (Pending / Shortlisted / Rejected)
+- 🔐 Secure Recruiter Login
+- 📄 Upload resumes in PDF format
+- 🧠 Automatic Resume Parsing & Skill Extraction
+- 🎯 AI-Based Resume Scoring
+- 👥 Candidate Management Dashboard
+- 👤 Detailed Candidate Profiles
+- 📑 Resume Preview & Download
+- 🔍 Search Candidates by Name or Skill
+- ⭐ Top Candidate Ranking
+- 📝 Recruiter Notes
+- 📊 Recruitment Analytics Dashboard
+- 🔔 Notification Panel
+- 👤 Recruiter Profile Management
+- 📱 Responsive User Interface
 
 ---
 
-## 🛠 Tech Stack
+# 🖥️ Project Modules
 
-### Frontend
+## 🔐 Authentication
+- Recruiter Login
+- Secure Logout
+
+## 📊 Recruiter Dashboard
+- Job Feed
+- Candidate List
+- Search Candidates
+- Notifications
+- Top Candidates
+- AI Summary (Future Enhancement)
+
+## 📄 Resume Upload
+Upload candidate resumes in PDF format for automatic analysis and storage.
+
+## 👤 Candidate Profile
+Each candidate profile includes:
+
+- Resume Score
+- Extracted Skills
+- Resume Preview
+- Resume Download
+- Recruiter Notes
+- Candidate Status (Pending / Shortlisted / Rejected)
+- AI Feedback
+
+## 📈 Analytics
+Visual representation of recruitment statistics and candidate evaluation.
+
+## 👤 Recruiter Profile
+- View Profile
+- Edit Profile
+- Profile Photo
+- Skills
+- Contact Information
+
+---
+
+# 🛠 Tech Stack
+
+## Frontend
 - React.js
 - Material UI
+- React Router DOM
 - JavaScript
 - CSS
 
-### Backend
+## Backend
 - Node.js
 - Express.js
 
-### Database
+## Database
 - MongoDB
 - Mongoose
 
-### Other Tools
-- Multer (File Upload)
-- PDF-Parse (Resume Text Extraction)
+## Other Tools
+- Multer
+- PDF-Parse
+- JWT Authentication
 
 ---
 
-## ⚙️ Installation
+# 📸 Screenshots
+
+> Add screenshots inside the **screenshots/** folder.
+
+- Home
+- Login
+- Dashboard
+- Resume Upload
+- Candidate List
+- Candidate Profile
+- Analytics
+- Recruiter Profile
+- Notifications
+
+---
+
+# ⚙️ Installation
 
 Clone the repository
 
 ```bash
 git clone https://github.com/harshita-singh2106/AI-Resume-Screening-Candidate-Evaluation-Platform.git
+```
+
+Go to the project folder
+
+```bash
+cd AI-Resume-Screening-Candidate-Evaluation-Platform
+```
+
+Install frontend dependencies
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Install backend dependencies
+
+```bash
+cd ../backend
+npm install
+npm start
+```
+
+---
+
+# 🚀 Future Enhancements
+
+- AI Candidate Ranking
+- Skill Gap Analysis
+- Hiring Recommendation Engine
+- Interview Scheduling
+- Email Notifications
+- Deep AI Analytics
+- Multi-Recruiter Support
+
+---
+
+# 👩‍💻 Author
+
+**Harshita Singh**
+
+B.Tech CSE, SRM Institute of Science and Technology
+
+GitHub:
+https://github.com/harshita-singh2106
+
+LinkedIn:
+(Add your LinkedIn profile)
+
+---
+
+⭐ If you found this project useful, consider giving it a Star.
