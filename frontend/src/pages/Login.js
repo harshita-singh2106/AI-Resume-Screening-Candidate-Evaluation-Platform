@@ -210,6 +210,36 @@ export default function Login() {
           LOGIN
         </Button>
 
+<Box
+  mt={3}
+  p={2}
+  sx={{
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: "14px",
+  }}
+>
+  <Typography
+    fontWeight="bold"
+    color="#38bdf8"
+    mb={1}
+  >
+    🚀 Demo Account
+  </Typography>
+
+  <Typography color="#e2e8f0" fontSize="14px">
+    <strong>Email:</strong> test@gmail.com
+  </Typography>
+
+  <Typography color="#e2e8f0" fontSize="14px">
+    <strong>Password:</strong> 1234
+  </Typography>
+
+  <Typography mt={1} color="#94a3b8" fontSize="12px">
+    Use these credentials to explore the platform.
+  </Typography>
+</Box>
+
         {/* EXTRA OPTIONS */}
         <Box
           mt={4}
